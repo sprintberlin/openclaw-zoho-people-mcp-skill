@@ -1,0 +1,7 @@
+{
+  "name": "zoho-people-mcp",
+  "version": "1.0.0",
+  "description": "Connect your agent to Zoho People via MCP. Search employees, inspect profiles, review leave types, check leave balances, and query attendance using mcporter.",
+  "author": "SprintCX",
+  "license": "MIT"
+}
