@@ -62,7 +62,7 @@ Look up an employee:
 
 ```bash
 cat > /tmp/people_employee.json <<'JSON'
-{"body": {"searchText": "Haas", "sIndex": 1, "limit": 20}}
+{"body": {"searchText": "Miller", "sIndex": 1, "limit": 20}}
 JSON
 mcporter call "$ZOHO_PEOPLE_MCP_URL.ZohoPeople_getEmployeeBasicDetails" --args "$(< /tmp/people_employee.json)"
 ```
@@ -74,7 +74,7 @@ Use the schema shown by the live MCP server when it differs from these examples.
 The scripts require `ZOHO_PEOPLE_MCP_URL`, call `mcporter` without shell expansion, paginate results, and normalize common Zoho MCP response envelopes.
 
 ```bash
-python3 scripts/list_employees.py --search "Haas" --json --limit 20
+python3 scripts/list_employees.py --search "Miller" --json --limit 20
 python3 scripts/inspect_employee.py 12345 --json
 python3 scripts/list_leave_types.py --json
 python3 scripts/list_leave_types.py --details "Vacation"

@@ -84,12 +84,12 @@ class PeopleHelperCliTests(unittest.TestCase):
 
         with patch.object(self.employees, "query_employees_page", side_effect=fake_page):
             result = self.employees.query_all_employees(
-                search="Haas", per_page=50, max_records=3, timeout=17
+                search="Miller", per_page=50, max_records=3, timeout=17
             )
 
         self.assertEqual(
             calls,
-            [{"search": "Haas", "s_index": 1, "limit": 3, "timeout": 17}],
+            [{"search": "Miller", "s_index": 1, "limit": 3, "timeout": 17}],
         )
         self.assertEqual(len(result["data"]), 3)
 

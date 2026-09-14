@@ -79,7 +79,7 @@ mcporter list $ZOHO_PEOPLE_MCP_URL
 ```bash
 cat << 'EOF' > /tmp/people_employee.json
 {
-  "body": {"searchText": "Haas", "sIndex": 1, "limit": 20}
+  "body": {"searchText": "Miller", "sIndex": 1, "limit": 20}
 }
 EOF
 mcporter call "$ZOHO_PEOPLE_MCP_URL.ZohoPeople_getEmployeeBasicDetails" --args "$(< /tmp/people_employee.json)"
@@ -106,8 +106,8 @@ The bundled Python scripts call `mcporter` directly through `subprocess.run([...
 
 ```bash
 python3 scripts/list_employees.py
-python3 scripts/list_employees.py --search "Haas"
-python3 scripts/list_employees.py --search "Haas" --json --limit 20
+python3 scripts/list_employees.py --search "Miller"
+python3 scripts/list_employees.py --search "Miller" --json --limit 20
 ```
 
 ### `inspect_employee.py`
