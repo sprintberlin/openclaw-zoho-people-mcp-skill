@@ -37,10 +37,10 @@ Mitigation: Load only required records and never copy contents into chats, logs,
 **Output Type(s):** [guidance, shell commands, configuration, code] <br>
 **Output Format:** [Markdown guidance with bash, JSON, and Python examples] <br>
 **Output Parameters:** [1D] <br>
-**Other Properties Related to Output:** [Requires a ZOHO_PEOPLE_MCP_URL endpoint; bundled helper scripts can print table or JSON output from Zoho People MCP calls.] <br>
+**Other Properties Related to Output:** [Requires ZOHO_PEOPLE_MCP_URL, a named profile, or a one-off endpoint; bundled helper scripts can print table or JSON output from Zoho People MCP calls.] <br>
 
 ## Skill Version(s): <br>
-1.0.0 <br>
+1.1.0 <br>
 
 ## Ethical Considerations: <br>
 Users should evaluate whether this skill is appropriate for their environment, review any generated or modified files before relying on them, and apply their organization's safety, security, and compliance requirements before deployment. <br>

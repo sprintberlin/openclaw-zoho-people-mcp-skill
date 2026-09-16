@@ -17,11 +17,11 @@ This repository contains the public source for the ClawHub skill [`@sprintcx/zoh
 |---|---|
 | Zoho People MCP Server | A configured endpoint from [mcp.zoho.eu](https://mcp.zoho.eu) |
 | mcporter | MCP client CLI (bundled with OpenClaw; elsewhere `npm i -g mcporter`) |
-| Environment variable | `ZOHO_PEOPLE_MCP_URL` must be set |
+| Endpoint selection | `ZOHO_PEOPLE_MCP_URL` for one account; named profiles or `--mcp-url` for multiple accounts |
 
-### Environment Variable Setup
+### Single-account setup
 
-This skill requires the `ZOHO_PEOPLE_MCP_URL` environment variable. Without it, the Python scripts will not work.
+For the common single-account case, set `ZOHO_PEOPLE_MCP_URL`. The helper scripts also support named profiles and one-off URL overrides.
 
 Add this to your shell profile, for example `~/.bashrc` or `~/.zshrc`:
 
@@ -58,13 +58,28 @@ Treat `ZOHO_PEOPLE_MCP_URL` like a password. It contains People access credentia
 
 7. Set it as `ZOHO_PEOPLE_MCP_URL`.
 
-### Multiple Organizations
+### Multiple organizations and customer accounts
 
-If you manage multiple Zoho People orgs, each gets its own MCP endpoint. You can:
+Use one shared profile file instead of changing global environment variables:
 
-- Set one default via `ZOHO_PEOPLE_MCP_URL`
-- Pass others explicitly in scripts or `mcporter` calls
-- Use a wrapper script or `.env` file per project
+```json
+{
+  "version": 1,
+  "profiles": {
+    "acme": {
+      "services": {
+        "people": {"env": "ACME_PEOPLE_MCP_URL"}
+      }
+    }
+  }
+}
+```
+
+```bash
+python3 scripts/list_employees.py --profile acme
+```
+
+The default file is `~/.config/zoho-mcp/profiles.json`. Endpoint resolution is `--mcp-url`, selected profile, then the app environment variable. Prefer profile entries using `env` or `url_file`; direct URLs in JSON are supported but make the file credential-bearing. Full format: [`references/MULTI_ACCOUNT.md`](references/MULTI_ACCOUNT.md).
 
 ## Quick Start
 
@@ -98,7 +113,7 @@ mcporter call "$ZOHO_PEOPLE_MCP_URL.ZohoPeople_fetchLeaveTypes" --args "$(< /tmp
 
 ## Python Scripts
 
-Ready-to-use scripts for common People operations. All scripts require `ZOHO_PEOPLE_MCP_URL` to be set.
+Ready-to-use scripts for common People operations. They accept `--profile`, `--profiles-file`, and `--mcp-url`, with `ZOHO_PEOPLE_MCP_URL` as the single-account fallback.
 
 The bundled Python scripts call `mcporter` directly through `subprocess.run([...])` and do not invoke a shell. This avoids shell expansion of the credential-bearing `ZOHO_PEOPLE_MCP_URL`.
 
@@ -174,9 +189,9 @@ To avoid loading schemas on session start, enable OpenClaw's built-in Tool Searc
 
 ## Troubleshooting
 
-### `ZOHO_PEOPLE_MCP_URL not set`
+### No endpoint configured
 
-Set the environment variable with your MCP endpoint URL. See [Environment Variable Setup](#environment-variable-setup).
+Set `ZOHO_PEOPLE_MCP_URL`, use `--profile`, or pass `--mcp-url`. For profile errors, verify the selected name, `--profiles-file`, and the `services.people` entry. See [Multi-account profiles](references/MULTI_ACCOUNT.md).
 
 ### `Invalid oauth scope to access this URL`
 
@@ -192,12 +207,15 @@ Most People APIs use `dd-MMM-yyyy`, for example `07-Sep-2026`. `getLeaveBalance`
 - `references/ACTION_PROFILES.md`: Least-privilege Action profiles for new People MCP connections.
 - `references/COMMON_WORKFLOWS.md`: Verified workflows for frequent People tasks.
 - `references/ZOHO_PEOPLE_MCP_ACTIONS.md`: Complete catalog of known People Actions.
+- `references/MULTI_ACCOUNT.md`: Portable single-account and multi-account endpoint profiles.
 - `skill-card.md`: ClawHub release card metadata.
 - `scripts/list_employees.py`: List or search Zoho People employees.
 - `scripts/inspect_employee.py`: Inspect one employee record by erecno.
 - `scripts/list_leave_types.py`: List leave types and fetch full configuration.
 - `scripts/leave_balances.py`: Fetch leave balances for one employee.
 - `scripts/attendance_summary.py`: Fetch attendance summaries.
+- `scripts/mcp_endpoint.py`: Shared endpoint and profile resolver.
+- `tests/test_endpoint_resolution.py`: Credential-free resolver tests.
 
 ## Security Notes
 
@@ -214,9 +232,9 @@ clawhub skill publish . \
   --slug zoho-people-mcp \
   --name "Zoho People MCP" \
   --owner sprintcx \
-  --version 1.0.0 \
+  --version 1.1.0 \
   --source-repo sprintberlin/openclaw-zoho-people-mcp-skill \
   --source-ref main \
   --source-path . \
-  --changelog "Initial public People MCP skill"
+  --changelog "Add portable multi-account endpoint profiles"
 ```

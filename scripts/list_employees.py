@@ -3,11 +3,18 @@
 
 import argparse
 import json
-import os
 import subprocess
 import sys
+from pathlib import Path
 
-MCP_URL = os.environ.get("ZOHO_PEOPLE_MCP_URL", "")
+_SCRIPTS_DIR = Path(__file__).resolve().parent
+if str(_SCRIPTS_DIR) not in sys.path:
+    sys.path.insert(0, str(_SCRIPTS_DIR))
+
+from mcp_endpoint import EndpointResolutionError, EndpointSelector, add_endpoint_arguments
+
+ENDPOINT = EndpointSelector("people", ("ZOHO_PEOPLE_MCP_URL",))
+
 TOOL = "ZohoPeople_getEmployeeBasicDetails"
 
 DEFAULT_COLUMNS = ["name", "email", "employeeid", "dept", "designation", "erecno"]
@@ -42,16 +49,19 @@ def build_parser():
     parser.add_argument("--limit", type=positive_int, help="return at most this many employees")
     parser.add_argument("--page-size", type=positive_int, default=50, help="page size (default: 50)")
     parser.add_argument("--timeout", type=positive_int, default=30, help="MCP call timeout in seconds (default: 30)")
+    add_endpoint_arguments(parser)
     return parser
 
 
 def _mcporter_call(tool, args, timeout=30):
     """Call mcporter directly without a shell."""
-    if not MCP_URL:
-        print("Error: ZOHO_PEOPLE_MCP_URL not set. Please set the environment variable.", file=sys.stderr)
+    try:
+        mcp_url = ENDPOINT.get()
+    except EndpointResolutionError as exc:
+        print(f"Error: {exc}", file=sys.stderr)
         sys.exit(1)
 
-    cmd = ["mcporter", "call", f"{MCP_URL}.{tool}", "--args", json.dumps(args, ensure_ascii=False)]
+    cmd = ["mcporter", "call", f"{mcp_url}.{tool}", "--args", json.dumps(args, ensure_ascii=False)]
     try:
         result = subprocess.run(cmd, capture_output=True, text=True, timeout=timeout, check=False)
     except FileNotFoundError:
@@ -200,6 +210,7 @@ def print_table(data, columns):
 
 def main(argv=None):
     args = build_parser().parse_args(argv)
+    ENDPOINT.configure(args)
 
     result = query_all_employees(
         args.search,

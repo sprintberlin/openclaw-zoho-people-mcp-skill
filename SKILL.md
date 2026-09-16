@@ -13,7 +13,7 @@ Source: [sprintberlin/openclaw-zoho-people-mcp-skill](https://github.com/sprintb
 
 - A Zoho People MCP endpoint from `mcp.zoho.eu`
 - `mcporter`
-- `ZOHO_PEOPLE_MCP_URL` for the bundled scripts
+- Endpoint configuration via `ZOHO_PEOPLE_MCP_URL`, `--profile`, or `--mcp-url`
 
 Treat the endpoint as a credential. Never print it, commit it, or copy it into tickets, prompts, or chats.
 
@@ -22,14 +22,20 @@ Treat the endpoint as a credential. Never print it, commit it, or copy it into t
 1. Create or open a Zoho People connection at `mcp.zoho.eu`.
 2. Select only the required Actions. Start with [references/ACTION_PROFILES.md](references/ACTION_PROFILES.md).
 3. Use [references/ZOHO_PEOPLE_MCP_ACTIONS.md](references/ZOHO_PEOPLE_MCP_ACTIONS.md) only when a profile lacks a required Action.
-4. Store the endpoint securely and expose it to the local process as `ZOHO_PEOPLE_MCP_URL`.
-5. Inspect the live server before relying on an Action:
+4. Configure one default endpoint with `ZOHO_PEOPLE_MCP_URL`, or create named profiles using [references/MULTI_ACCOUNT.md](references/MULTI_ACCOUNT.md).
+5. Inspect the selected live server before relying on an Action:
 
 ```bash
 mcporter list "$ZOHO_PEOPLE_MCP_URL"
 ```
 
 The catalog describes possible Actions. It does not prove that an Action is enabled on a particular MCP server. Runtime tool names usually have the `ZohoPeople_` prefix, while the Zoho MCP setup UI uses the Action name without that prefix.
+
+## Endpoint selection
+
+For one account, set `ZOHO_PEOPLE_MCP_URL`. For multiple accounts, pass `--profile NAME` to a bundled helper. Profiles live in `~/.config/zoho-mcp/profiles.json` by default and can resolve endpoints through an environment variable, a local URL file, or a direct URL. One-off `--mcp-url URL` overrides everything, but may expose the credential in shell history or process listings.
+
+Resolution order is `--mcp-url`, selected profile, then the environment fallback. Profile selection is `--profile`, `ZOHO_PEOPLE_MCP_PROFILE`, then `ZOHO_MCP_PROFILE`. See [references/MULTI_ACCOUNT.md](references/MULTI_ACCOUNT.md) for the shared CRM, People, and Books format.
 
 ## Safe workflow
 
@@ -71,7 +77,7 @@ Use the schema shown by the live MCP server when it differs from these examples.
 
 ## Bundled scripts
 
-The scripts require `ZOHO_PEOPLE_MCP_URL`, call `mcporter` without shell expansion, paginate results, and normalize common Zoho MCP response envelopes.
+The scripts resolve the endpoint via `--mcp-url`, `--profile` (`~/.config/zoho-mcp/profiles.json`), or `ZOHO_PEOPLE_MCP_URL`, call `mcporter` without shell expansion, paginate results, and normalize common Zoho MCP response envelopes.
 
 ```bash
 python3 scripts/list_employees.py --search "Miller" --json --limit 20
@@ -89,6 +95,7 @@ Supported options:
 - `list_leave_types.py`: `--details` name or ID, `--json`, `--limit`, `--page-size`, `--timeout`
 - `leave_balances.py`: `--erecno`, `--year`, `--json`, `--timeout`
 - `attendance_summary.py`: `--erecno`, `--json`, `--limit`, `--page-size`, `--timeout`
+- All helpers: `--mcp-url`, `--profile`, `--profiles-file`
 
 Run any helper with `--help` without configuring credentials. Unknown or incomplete options must exit with status 2.
 
@@ -113,12 +120,14 @@ Run any helper with `--help` without configuring credentials. Unknown or incompl
 - [Action profiles](references/ACTION_PROFILES.md): recommended least-privilege selections for new MCP servers
 - [Common workflows](references/COMMON_WORKFLOWS.md): verified step-by-step procedures for frequent People tasks
 - [Complete People Actions catalog](references/ZOHO_PEOPLE_MCP_ACTIONS.md): all known People Actions and descriptions
+- [Multi-account profiles](references/MULTI_ACCOUNT.md): portable endpoint selection for one or many Zoho accounts
 
 Load the profile reference when configuring a connection. Load workflows when executing a covered task. Load the full catalog only when a profile lacks a required Action.
 
 ## Troubleshooting and safety
 
-- **`ZOHO_PEOPLE_MCP_URL not set`**: set the environment variable in the current session without exposing its value.
+- **No endpoint configured**: set `ZOHO_PEOPLE_MCP_URL`, use `--profile`, or pass `--mcp-url`; never print the value.
+- **Profile not found or wrong app**: verify `--profiles-file`, the profile name, and its `services.people` entry.
 - **Unknown form or field**: resolve with `identifyForm` and `getFields`; do not guess API names.
 - **OAuth scope error**: reconnect the affected MCP connection with the required scope; never switch to another customer's endpoint.
 - Zoho People contains sensitive personal data. Load only required records and never copy contents into chats, logs, or repositories.
