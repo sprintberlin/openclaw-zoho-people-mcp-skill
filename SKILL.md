@@ -20,8 +20,21 @@ Treat the endpoint as a credential. Never print it, commit it, or copy it into t
 ## First setup
 
 1. Create or open a Zoho People connection at `mcp.zoho.eu`.
-2. Select only the required Actions. Start with [references/ACTION_PROFILES.md](references/ACTION_PROFILES.md).
-3. Use [references/ZOHO_PEOPLE_MCP_ACTIONS.md](references/ZOHO_PEOPLE_MCP_ACTIONS.md) only when a profile lacks a required Action.
+2. Select only the required Actions. Resolve the exact list from the JSON catalog:
+
+```bash
+python3 scripts/lookup_actions.py --profiles
+python3 scripts/lookup_actions.py --profile hr-admin --names-only
+python3 scripts/lookup_actions.py --task leave-booking --names-only
+```
+
+3. Search the catalog when a profile or task lacks a required Action:
+
+```bash
+python3 scripts/lookup_actions.py --search "holiday"
+python3 scripts/lookup_actions.py --action applyLeave
+```
+
 4. Configure one default endpoint with `ZOHO_PEOPLE_MCP_URL`, or create named profiles using [references/MULTI_ACCOUNT.md](references/MULTI_ACCOUNT.md).
 5. Inspect the selected live server before relying on an Action:
 
@@ -75,6 +88,34 @@ mcporter call "$ZOHO_PEOPLE_MCP_URL.ZohoPeople_getEmployeeBasicDetails" --args "
 
 Use the schema shown by the live MCP server when it differs from these examples. For deeply nested arguments, use a temporary JSON file instead of fragile shell quoting.
 
+## Answering "which Actions do I need"
+
+The catalog is JSON, not prose. Never read the whole catalog into context to answer an Action question. Query it instead.
+
+```bash
+# Role profiles, inheritance resolved
+python3 scripts/lookup_actions.py --profile employee-self-service
+python3 scripts/lookup_actions.py --profile manager
+python3 scripts/lookup_actions.py --profile hr-admin
+
+# One concrete job
+python3 scripts/lookup_actions.py --tasks
+python3 scripts/lookup_actions.py --task employee-record-maintenance
+
+# Keyword search across every Action name and description
+python3 scripts/lookup_actions.py --search "leave type"
+
+# Full Zoho description of a single Action, including its dependencyTools note
+python3 scripts/lookup_actions.py --action editLeaveType
+
+# Check that profiles and tasks still match the catalog
+python3 scripts/lookup_actions.py --validate
+```
+
+Add `--names-only` for a copy-ready list for the Zoho MCP setup UI, or `--json` for structured output.
+
+Data files: [references/actions.jsonl](references/actions.jsonl) holds every known Action with its Zoho description; [references/profiles.json](references/profiles.json) holds role profiles and task recipes. Format and maintenance: [references/CATALOG_FORMAT.md](references/CATALOG_FORMAT.md).
+
 ## Bundled scripts
 
 The scripts resolve the endpoint via `--mcp-url`, `--profile` (`~/.config/zoho-mcp/profiles.json`), or `ZOHO_PEOPLE_MCP_URL`, call `mcporter` without shell expansion, paginate results, and normalize common Zoho MCP response envelopes.
@@ -104,11 +145,10 @@ Run any helper with `--help` without configuring credentials. Unknown or incompl
 - `applyLeave` requires `fetchLeaveBasicInfo` for the form, `getFields` for mandatory fields, and `getLeaveBalance` for applicable types. Map the chosen leave type name to its ID internally.
 - `cancelLeave` needs the leave record ID and a reason.
 - Leave type changes go through `fetchLeaveTypes` and `fetchLeaveTypeDetails` before `editLeaveType`. Send the merged complete leave-type JSON, not a sparse partial.
-- `deleteLeaveType` permanently deletes the leave type and its report data. Keep it disabled by default.
 
 ## Higher-impact admin Actions
 
-`addLeaveType`, `editLeaveType`, `deleteLeaveType`, org structure Actions (`createDivision`, `updateEntity`, and peers), `addRecord` and `updateRecord` on HR forms, salary Actions, and benefit-plan administration change configuration for everyone. Apply these safeguards:
+`addLeaveType`, `editLeaveType`, org structure Actions (`createDivision`, `updateEntity`, and peers), `addRecord` and `updateRecord` on HR forms, attendance policy updates (`updateAttendancePolicySettings`, `updateSpecificPolicy`), salary Actions, and benefit-plan administration change configuration for everyone. Apply these safeguards:
 
 - Confirm target form, record, and field names with `identifyForm`, `getFields`, and `getRecords` before writing.
 - Resolve department, location, designation, role, and user references through their lookup tools. Never fabricate IDs.
@@ -117,12 +157,14 @@ Run any helper with `--help` without configuring credentials. Unknown or incompl
 
 ## References
 
-- [Action profiles](references/ACTION_PROFILES.md): recommended least-privilege selections for new MCP servers
+- [Action catalog](references/actions.jsonl): every known People Action with its Zoho description, one JSON object per line
+- [Profiles and task recipes](references/profiles.json): role profiles and per-task Action sets
+- [Catalog format](references/CATALOG_FORMAT.md): why the catalog is JSON, the record shape, and how to refresh it
+- [Action profiles overview](references/ACTION_PROFILES.md): human-readable summary of the configured profiles and tasks
 - [Common workflows](references/COMMON_WORKFLOWS.md): verified step-by-step procedures for frequent People tasks
-- [Complete People Actions catalog](references/ZOHO_PEOPLE_MCP_ACTIONS.md): all known People Actions and descriptions
 - [Multi-account profiles](references/MULTI_ACCOUNT.md): portable endpoint selection for one or many Zoho accounts
 
-Load the profile reference when configuring a connection. Load workflows when executing a covered task. Load the full catalog only when a profile lacks a required Action.
+Query the catalog with `scripts/lookup_actions.py` instead of loading `actions.jsonl` into context. Load workflows when executing a covered task.
 
 ## Troubleshooting and safety
 

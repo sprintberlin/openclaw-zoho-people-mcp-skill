@@ -153,15 +153,38 @@ python3 scripts/attendance_summary.py --erecno 12345 --json
 
 ## People Action Catalog and Profiles
 
-Zoho People exposes roughly 240 MCP Actions. Enabling all of them gives a normal agent unnecessary access to salary data, benefit administration, leave-type deletion, and organization structure changes.
+Zoho People exposes 369 MCP Actions. Enabling all of them gives a normal agent unnecessary access to salary data, benefit administration, and organization structure changes.
 
-This repository is the canonical home for both documents:
+The catalog is JSON, not prose, so an agent can answer "which Actions do I need for this task" without reading thousands of lines:
 
-- [`references/ACTION_PROFILES.md`](references/ACTION_PROFILES.md) contains copy-ready least-privilege profiles for a self-service employee, a manager, an HR admin, and a deliberately unbundled developer/administrator role.
-- [`references/ZOHO_PEOPLE_MCP_ACTIONS.md`](references/ZOHO_PEOPLE_MCP_ACTIONS.md) contains the complete catalog of known People Actions and descriptions.
+- [`references/actions.jsonl`](references/actions.jsonl) is the complete catalog, one JSON object per Action, with the description Zoho itself delivers.
+- [`references/profiles.json`](references/profiles.json) holds the role profiles and the per-task Action recipes.
+- [`references/CATALOG_FORMAT.md`](references/CATALOG_FORMAT.md) documents the format and how to refresh it after a Zoho catalog change.
+- [`references/ACTION_PROFILES.md`](references/ACTION_PROFILES.md) is a short human-readable overview of the configured profiles and tasks.
 - [`references/COMMON_WORKFLOWS.md`](references/COMMON_WORKFLOWS.md) contains verified step-by-step procedures.
 
-For a normal HR operator, start with the **People HR Admin** profile. It includes employee lookup, leave configuration, org structure, and admin reports. It deliberately excludes leave-type deletion, salary, and benefit-plan administration.
+Query it with the bundled CLI:
+
+```bash
+# Which role profiles and task recipes exist
+python3 scripts/lookup_actions.py --profiles
+python3 scripts/lookup_actions.py --tasks
+
+# Which Actions does a role need, inheritance resolved
+python3 scripts/lookup_actions.py --profile hr-admin
+
+# Which Actions does one concrete job need, copy-ready for the Zoho setup UI
+python3 scripts/lookup_actions.py --task leave-booking --names-only
+
+# Find an Action, or read its full Zoho description
+python3 scripts/lookup_actions.py --search "holiday"
+python3 scripts/lookup_actions.py --action applyLeave
+
+# Check that profiles and tasks still match the catalog
+python3 scripts/lookup_actions.py --validate
+```
+
+For a normal HR operator, start with the **People HR Admin** profile. It includes employee lookup, leave configuration, attendance rules, org structure, and admin reports. It deliberately excludes salary, compensation, and destructive settings deletes.
 
 After configuring the connection at [mcp.zoho.eu](https://mcp.zoho.eu), verify the actual result rather than trusting the profile document:
 
@@ -204,11 +227,15 @@ Most People APIs use `dd-MMM-yyyy`, for example `07-Sep-2026`. `getLeaveBalance`
 ## Repository Files
 
 - `SKILL.md`: Agent Skill instructions.
-- `references/ACTION_PROFILES.md`: Least-privilege Action profiles for new People MCP connections.
+- `references/actions.jsonl`: Complete Action catalog, one JSON object per Action.
+- `references/profiles.json`: Role profiles and per-task Action recipes.
+- `references/CATALOG_FORMAT.md`: Catalog format, record shape, and refresh procedure.
+- `references/ACTION_PROFILES.md`: Human-readable overview of profiles and task recipes.
 - `references/COMMON_WORKFLOWS.md`: Verified workflows for frequent People tasks.
-- `references/ZOHO_PEOPLE_MCP_ACTIONS.md`: Complete catalog of known People Actions.
 - `references/MULTI_ACCOUNT.md`: Portable single-account and multi-account endpoint profiles.
 - `skill-card.md`: ClawHub release card metadata.
+- `scripts/lookup_actions.py`: Query Actions, profiles, and task recipes; validate them.
+- `scripts/import_actions.py`: Rebuild the catalog from a Zoho MCP setup UI dump.
 - `scripts/list_employees.py`: List or search Zoho People employees.
 - `scripts/inspect_employee.py`: Inspect one employee record by erecno.
 - `scripts/list_leave_types.py`: List leave types and fetch full configuration.
@@ -216,6 +243,7 @@ Most People APIs use `dd-MMM-yyyy`, for example `07-Sep-2026`. `getLeaveBalance`
 - `scripts/attendance_summary.py`: Fetch attendance summaries.
 - `scripts/mcp_endpoint.py`: Shared endpoint and profile resolver.
 - `tests/test_endpoint_resolution.py`: Credential-free resolver tests.
+- `tests/test_actions_lookup.py`: Catalog, profile, and lookup CLI tests.
 
 ## Security Notes
 
@@ -232,9 +260,9 @@ clawhub skill publish . \
   --slug zoho-people-mcp \
   --name "Zoho People MCP" \
   --owner sprintcx \
-  --version 1.1.0 \
+  --version 1.2.0 \
   --source-repo sprintberlin/openclaw-zoho-people-mcp-skill \
   --source-ref main \
   --source-path . \
-  --changelog "Add portable multi-account endpoint profiles"
+  --changelog "JSON action catalog with role profiles, task recipes, and lookup CLI"
 ```

@@ -1,0 +1,424 @@
+{
+  "version": 1,
+  "service": "people",
+  "catalog": "actions.jsonl",
+  "profiles": {
+    "employee-self-service": {
+      "name": "People Employee, self-service",
+      "description": "Own profile, leave booking, personal attendance, timelogs, and HR helpdesk cases.",
+      "actions": [
+        "addCase",
+        "addOnDuty",
+        "addRegularization",
+        "addShiftChangeRequest",
+        "addTimelog",
+        "addWFHRequest",
+        "applyLeave",
+        "applyPermission",
+        "bookedAndBalance",
+        "cancelLeave",
+        "cancelRegularization",
+        "cancelcompoff",
+        "checkIn",
+        "checkOut",
+        "editTimelog",
+        "fetchEmployeeRecordById",
+        "fetchLeaveBasicInfo",
+        "fetchLeaveTypes",
+        "getAllODTypes",
+        "getAllRegReasons",
+        "getApplicablePermForUser",
+        "getApplicableShiftsForUser",
+        "getApprovals",
+        "getAttendanceSettingsMethods",
+        "getAttendanceSummary",
+        "getCaseAddSettings",
+        "getCheckinHistory",
+        "getCompoffRecords",
+        "getCurrentlyRunningTimer",
+        "getEmployeeBasicDetails",
+        "getLeaveBalance",
+        "getLeaveRecords",
+        "getMyTasks",
+        "getRunningTimer",
+        "getStatus",
+        "getTimelogs",
+        "getWFHPolicyInfo",
+        "leavePreview",
+        "listAllCategory",
+        "listCaseSubCategories",
+        "listMyRequests",
+        "listholidays",
+        "startTimer",
+        "sumbitTimesheet",
+        "viewCase"
+      ]
+    },
+    "manager": {
+      "name": "People Manager",
+      "description": "Employee self-service plus team visibility, shift schedules, and approval handling.",
+      "extends": "employee-self-service",
+      "actions": [
+        "approvalReject",
+        "employeeInsights",
+        "getDepartmentShiftGrouping",
+        "getEarlyLateCheckInData",
+        "getEmployeeShiftDetails",
+        "getReportees",
+        "getShiftInfo",
+        "getTeamMembersOnLeave",
+        "getUserAvailability",
+        "getWFHApprovals"
+      ]
+    },
+    "hr-admin": {
+      "name": "People HR Admin",
+      "description": "Operational HR administration: employee form records, leave policy setup, attendance rules, holidays, org structure, and reports. Excludes salary, benefits, and destructive settings deletes.",
+      "extends": "manager",
+      "actions": [
+        "addLeaveType",
+        "addRecord",
+        "createDivision",
+        "createEntity",
+        "createUnit",
+        "editLeaveType",
+        "fetchForms",
+        "fetchLeaveTypeDetails",
+        "fetchallgroups",
+        "fetchgroupmembers",
+        "getApplicableInfo",
+        "getAttendancePolicySettings",
+        "getAttendanceSettingsParams",
+        "getAttritionReport",
+        "getCheckinCheckoutSettings",
+        "getDepartmentDetails",
+        "getDivisions",
+        "getEntities",
+        "getFieldOptions",
+        "getFields",
+        "getFormView",
+        "getLocationDetails",
+        "getLookupOptions",
+        "getOnDutySettings",
+        "getRecordByIDSectionWise",
+        "getRecordCount",
+        "getRecords",
+        "getRecordsViewUrl",
+        "getRegularizationSettings",
+        "getReportSettings",
+        "getSpecificPolicies",
+        "getSpecificPolicyDetail",
+        "getUnits",
+        "identifyForm",
+        "updateAttendancePolicySettings",
+        "updateDivision",
+        "updateEntity",
+        "updateRecord",
+        "updateUnit"
+      ],
+      "denied": [
+        "deleteCandidate",
+        "deletePresentByDefault",
+        "deleteSpecificPolicy",
+        "fetchEmployeeSalaries",
+        "fetchRevisions",
+        "fetchSalaryPackages",
+        "fetchSingleEmployeeBreakupDetails",
+        "fetchSingleEmployeeRevisions",
+        "fetchSingleEmployeeSalary",
+        "mycompensation"
+      ]
+    }
+  },
+  "tasks": {
+    "employee-lookup": {
+      "name": "Employee lookup and profile inspection",
+      "description": "Find an employee by name, email, or employee ID, resolve the erecno, and read detailed profile fields.",
+      "actions": [
+        "getEmployeeBasicDetails",
+        "fetchEmployeeRecordById",
+        "identifyForm",
+        "getFields",
+        "getRecords"
+      ]
+    },
+    "employee-record-maintenance": {
+      "name": "Create or correct employee and HR form records",
+      "description": "Resolve a form, its fields, picklists, and lookups, then create or update records. Covers corrections such as a wrong date of joining.",
+      "actions": [
+        "identifyForm",
+        "getFormView",
+        "getFields",
+        "getFieldOptions",
+        "getLookupOptions",
+        "getRecords",
+        "getRecordCount",
+        "getRecordByIDSectionWise",
+        "getRecordsViewUrl",
+        "addRecord",
+        "updateRecord"
+      ]
+    },
+    "leave-type-configuration": {
+      "name": "Configure and audit leave types",
+      "description": "Review configured leave types, inspect one policy in full, and add or change leave-type rules including applicability.",
+      "actions": [
+        "fetchLeaveTypes",
+        "fetchLeaveTypeDetails",
+        "addLeaveType",
+        "editLeaveType",
+        "getDepartmentDetails",
+        "getLocationDetails",
+        "getApplicableInfo",
+        "getRecords"
+      ]
+    },
+    "leave-booking": {
+      "name": "Book, preview, and cancel leave",
+      "description": "Check balances, preview the balance impact, submit a leave request for an employee, and cancel an existing one.",
+      "actions": [
+        "getEmployeeBasicDetails",
+        "fetchLeaveBasicInfo",
+        "getFields",
+        "getLeaveBalance",
+        "leavePreview",
+        "applyLeave",
+        "getLeaveRecords",
+        "cancelLeave"
+      ]
+    },
+    "leave-balance-reporting": {
+      "name": "Leave balances and absence reporting",
+      "description": "Report booked versus remaining leave, list leave records across employees, and see who is absent.",
+      "actions": [
+        "getEmployeeBasicDetails",
+        "getLeaveBalance",
+        "bookedAndBalance",
+        "getLeaveRecords",
+        "getTeamMembersOnLeave",
+        "getCompoffRecords"
+      ]
+    },
+    "holiday-calendar": {
+      "name": "Holiday calendar review",
+      "description": "Inspect the holidays applicable to a user and the leave-type rules that govern holiday and weekend handling.",
+      "actions": [
+        "listholidays",
+        "getLocationDetails",
+        "fetchLeaveTypes",
+        "fetchLeaveTypeDetails"
+      ]
+    },
+    "attendance-reporting": {
+      "name": "Attendance, working hours, and overtime reporting",
+      "description": "Review payable days, worked hours, overtime, deviations, and daily punch details for one or many employees.",
+      "actions": [
+        "getEmployeeBasicDetails",
+        "getAttendanceSummary",
+        "getAttendanceDetailedReport",
+        "getEarlyLateCheckInData",
+        "getCheckinHistory",
+        "getReportSettings"
+      ]
+    },
+    "attendance-policy-configuration": {
+      "name": "Configure attendance and working-hour policy",
+      "description": "Read and change organization-wide working hours, round-off, grace, overtime carry-over, and scoped attendance policies.",
+      "actions": [
+        "getAttendanceSettingsMethods",
+        "getAttendanceSettingsParams",
+        "getAttendancePolicySettings",
+        "updateAttendancePolicySettings",
+        "getSpecificPolicies",
+        "getSpecificPolicyDetail",
+        "createSpecificPolicy",
+        "updateSpecificPolicy",
+        "getReportSettings",
+        "updateReportSettings",
+        "getApplicableInfo",
+        "getShiftInfo"
+      ]
+    },
+    "attendance-regularization": {
+      "name": "Attendance regularization and correction",
+      "description": "Check whether regularization is enabled, fetch valid reasons, submit a correction, and cancel or approve it.",
+      "actions": [
+        "getAttendanceSettingsMethods",
+        "getAllRegReasons",
+        "getRegularizationSettings",
+        "addRegularization",
+        "cancelRegularization",
+        "getApprovals",
+        "approvalReject"
+      ]
+    },
+    "shift-management": {
+      "name": "Shifts and team scheduling",
+      "description": "Inspect configured shifts, read employee shift mappings, and process shift change requests.",
+      "actions": [
+        "getShiftInfo",
+        "getApplicableShiftsForUser",
+        "getEmployeeShiftDetails",
+        "getDepartmentShiftGrouping",
+        "addShiftChangeRequest",
+        "getApprovals",
+        "approvalReject"
+      ]
+    },
+    "time-tracking": {
+      "name": "Project and job time tracking",
+      "description": "Query jobs, log and correct hours, control the running timer, and submit timesheets.",
+      "actions": [
+        "getJobs",
+        "getTimelogs",
+        "addTimelog",
+        "editTimelog",
+        "deleteTimelogs",
+        "getCurrentlyRunningTimer",
+        "getRunningTimer",
+        "startTimer",
+        "getTimesheets",
+        "sumbitTimesheet"
+      ]
+    },
+    "remote-work-policy": {
+      "name": "Work from home and remote policy",
+      "description": "Inspect remote work policies and balances, submit WFH requests, and approve them.",
+      "actions": [
+        "getWFHPolicyInfo",
+        "addWFHRequest",
+        "getWFHApprovals",
+        "getRemotePolicies",
+        "getRemotePolicy",
+        "createRemotePolicy",
+        "updateRemotePolicy",
+        "approvalReject"
+      ]
+    },
+    "approvals-inbox": {
+      "name": "Approval inbox handling",
+      "description": "List pending approvals or own requests across modules and approve or reject them.",
+      "actions": [
+        "getApprovals",
+        "approvalReject",
+        "getWFHApprovals",
+        "getEmployeeBasicDetails"
+      ]
+    },
+    "hr-helpdesk": {
+      "name": "HR helpdesk cases",
+      "description": "Raise, triage, comment on, and resolve internal HR helpdesk tickets.",
+      "actions": [
+        "getCaseAddSettings",
+        "listAllCategory",
+        "listCaseSubCategories",
+        "addCase",
+        "listMyCases",
+        "listMyRequests",
+        "viewCase",
+        "replyCaseComment",
+        "changeCaseStatus",
+        "changeCasePriority",
+        "changeCaseCategory"
+      ]
+    },
+    "helpdesk-reporting": {
+      "name": "HR helpdesk reporting",
+      "description": "Report open, escalated, and closed HR case volumes for a period.",
+      "actions": [
+        "allCaseslist",
+        "OverAllStatusCases",
+        "GetRequestedClosedCases",
+        "requestedVsEscalatedCases"
+      ]
+    },
+    "onboarding": {
+      "name": "Candidate and employee onboarding",
+      "description": "Add candidates, trigger onboarding and workflows, resend invitations, and complete or reopen onboarding.",
+      "actions": [
+        "addCandidate",
+        "listOnboardingRecords",
+        "triggerCandidateOnboarding",
+        "triggerEmployeeOnboarding",
+        "triggerWorkflow",
+        "resendInvitation",
+        "reTriggerOnboarding",
+        "completeOnboarding",
+        "reopenOnboarding",
+        "getDepartmentDetails",
+        "getLocationDetails"
+      ]
+    },
+    "org-structure": {
+      "name": "Organization structure and directories",
+      "description": "Read and maintain legal entities, business units, divisions, departments, locations, and groups.",
+      "actions": [
+        "getDepartmentDetails",
+        "getLocationDetails",
+        "getApplicableInfo",
+        "getEntities",
+        "createEntity",
+        "updateEntity",
+        "getUnits",
+        "createUnit",
+        "updateUnit",
+        "getDivisions",
+        "createDivision",
+        "updateDivision",
+        "fetchallgroups",
+        "fetchgroupmembers"
+      ]
+    },
+    "workforce-analytics": {
+      "name": "Workforce analytics and headcount",
+      "description": "Report headcount by department, location, and designation, plus attrition and diversity distribution.",
+      "actions": [
+        "employeeInsights",
+        "getAttritionReport",
+        "getReportees",
+        "getRecordCount"
+      ]
+    },
+    "performance-management": {
+      "name": "Performance, KRAs, goals, and appraisals",
+      "description": "Maintain org and user KRAs, competencies, skills, goals, and read appraisal ratings.",
+      "actions": [
+        "getOrgKras",
+        "addOrgKras",
+        "editOrgKras",
+        "getUserKras",
+        "tagUserKras",
+        "addAndTagUserKra",
+        "getUserGoals",
+        "mapGoalsToKra",
+        "getOrgCompetencies",
+        "getUserCompetencies",
+        "getOrgSkills",
+        "getUserSkills",
+        "getAppraisalCycles",
+        "getAppraisalFinalRatingsofUser",
+        "getEmployeeBasicDetails"
+      ]
+    },
+    "okr-management": {
+      "name": "OKR objectives and key results",
+      "description": "Create and maintain organization, department, location, and user objectives with their key results.",
+      "actions": [
+        "getOkrConfigData",
+        "getOrgObjectives",
+        "getDepartmentObjectives",
+        "getLocationObjectives",
+        "getMyObjectives",
+        "getTeamObjectives",
+        "addOrgObjective",
+        "addDepartmentObjective",
+        "addUserObjective",
+        "addKeyResult",
+        "getObjectiveDetails",
+        "checkinKeyResult",
+        "getCheckInFrequencyOptions",
+        "getCheckInPlanDates"
+      ]
+    }
+  }
+}
