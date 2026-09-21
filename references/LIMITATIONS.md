@@ -31,4 +31,6 @@ For operations not supported by MCP, use the direct REST API with standard OAuth
 - Environment variables: `ZOHO_PEOPLE_CLIENT_ID`, `ZOHO_PEOPLE_CLIENT_SECRET`, `ZOHO_PEOPLE_REFRESH_TOKEN`, `ZOHO_PEOPLE_DC` (default: `eu`).
 - Cached access tokens in `~/.cache/zoho-people-api/tokens.json` (mode 0600).
 - Scripts: `scripts/people_api.py` (OAuth + generic REST) and `scripts/customize_leave_balance.py` (dry run by default; `--apply` writes).
-- One-time setup: create a **Self Client** in the Zoho API Console (`api-console.zoho.eu`), generate a short-lived grant code with scope `ZOHOPEOPLE.leave.CREATE`, exchange it for a refresh token at `https://accounts.zoho.eu/oauth/v2/token`, store credentials in a vault. The refresh token stays valid until revoked; only the grant code is short-lived.
+- Scope: `ZOHOPEOPLE.leave.CREATE,ZOHOPEOPLE.leave.READ` (write plus verification).
+- Customize-balance uses `/people/api/v2/...`, query parameters, and `dateFormat` (not `dataFormat`). `newBalance` is the total entitlement; verification checks `available + taken`.
+- One-time setup: create a **Self Client** in the Zoho API Console (`api-console.zoho.eu`), generate a short-lived grant code, exchange it at `https://accounts.zoho.eu/oauth/v2/token`, store credentials in a vault. The refresh token stays valid until revoked.

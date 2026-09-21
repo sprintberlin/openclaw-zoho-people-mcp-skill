@@ -32,7 +32,12 @@ def build_parser():
     )
     parser.add_argument("--erecno", required=True, help="employee erecno")
     parser.add_argument("--leave-type-id", required=True, help="leave type ID")
-    parser.add_argument("--balance", required=True, type=float, help="new balance (e.g. 9.5)")
+    parser.add_argument(
+        "--balance",
+        required=True,
+        type=float,
+        help="new total entitlement/balance, not remaining leave (e.g. 9.5)",
+    )
     parser.add_argument("--date", required=True, help="effective date in dd-MMM-yyyy (e.g. 07-Sep-2026)")
     parser.add_argument("--reason", required=True, help="reason for the adjustment")
     parser.add_argument("--dc", choices=sorted(people_api.PEOPLE_DC), help="Zoho DC (eu, com, in, etc.)")
@@ -65,16 +70,46 @@ def build_request(erecno, leave_type_id, balance, date_str, reason):
     }
     params = {
         "balanceData": json.dumps(balance_data),
-        "dataFormat": "dd-MMM-yyyy",
+        "dateFormat": "dd-MMM-yyyy",
     }
-    path = f"/api/v2/leavetracker/settings/customize-balance/{erecno}"
+    path = f"/people/api/v2/leavetracker/settings/customize-balance/{erecno}"
     return path, params
 
 
-def customize_balance(erecno, leave_type_id, balance, date_str, reason, dc=None, timeout=30):
+def customize_balance(
+    erecno,
+    leave_type_id,
+    balance,
+    date_str,
+    reason,
+    dc=None,
+    timeout=30,
+    credentials=None,
+):
     path, params = build_request(erecno, leave_type_id, balance, date_str, reason)
-    creds = people_api.load_credentials(dc=dc)
-    return people_api.call(path, params=params, method="POST", credentials=creds, timeout=timeout)
+    creds = credentials or people_api.load_credentials(dc=dc)
+    return people_api.call(
+        path,
+        params=params,
+        method="POST",
+        credentials=creds,
+        timeout=timeout,
+        params_in_query=True,
+    )
+
+
+def fetch_leave_balance(erecno, leave_type_id, credentials, timeout=30):
+    result = people_api.call(
+        "/people/api/v2/leavetracker/reports/user",
+        params={"employee": str(erecno)},
+        method="GET",
+        credentials=credentials,
+        timeout=timeout,
+    )
+    for record in result.get("leavetypes", []):
+        if str(record.get("leavetypeID")) == str(leave_type_id):
+            return record
+    raise people_api.PeopleApiError("leave type missing from verification report")
 
 
 def main(argv=None):
@@ -89,6 +124,7 @@ def main(argv=None):
             preview = {"dry_run": True, "method": "POST", "path": path, "params": params}
             print(json.dumps(preview, indent=2, ensure_ascii=False))
             return 0
+        credentials = people_api.load_credentials(dc=args.dc)
         res = customize_balance(
             erecno=args.erecno,
             leave_type_id=args.leave_type_id,
@@ -97,17 +133,34 @@ def main(argv=None):
             reason=args.reason,
             dc=args.dc,
             timeout=args.timeout,
+            credentials=credentials,
         )
+        verified = fetch_leave_balance(
+            args.erecno, args.leave_type_id, credentials, timeout=args.timeout
+        )
+        available = float(verified.get("available", 0))
+        taken = float(verified.get("taken", 0))
+        total = available + taken
+        if not math.isclose(total, args.balance, abs_tol=0.0001):
+            raise people_api.PeopleApiError(
+                f"verification failed: available {available:g} + taken {taken:g} = {total:g}, expected {args.balance:g}"
+            )
     except (ValueError, people_api.PeopleApiError) as exc:
         print(f"Error: {exc}", file=sys.stderr)
         return 1
 
     if args.json:
-        print(json.dumps(res, indent=2, ensure_ascii=False))
+        print(
+            json.dumps(
+                {"update": res, "verification": verified},
+                indent=2,
+                ensure_ascii=False,
+            )
+        )
     else:
-        status = res.get("status", "success")
-        msg = res.get("message", "Balance updated successfully")
-        print(f"Status: {status} — {msg}")
+        print(
+            f"Status: success — total {total:g}, available {available:g}, taken {taken:g}"
+        )
     return 0
 
 

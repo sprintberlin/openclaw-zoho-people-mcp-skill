@@ -84,7 +84,7 @@ python3 scripts/customize_leave_balance.py \
   --balance 9.5 --date 07-Sep-2026 --reason "Prorated entitlement" --apply
 ```
 
-Env: `ZOHO_PEOPLE_CLIENT_ID`, `ZOHO_PEOPLE_CLIENT_SECRET`, `ZOHO_PEOPLE_REFRESH_TOKEN`, `ZOHO_PEOPLE_DC` (default `eu`), scope `ZOHOPEOPLE.leave.CREATE`. Refresh tokens stay valid until revoked; only the grant code expires. Other endpoints: import `scripts/people_api.py`.
+Env: `ZOHO_PEOPLE_CLIENT_ID`, `ZOHO_PEOPLE_CLIENT_SECRET`, `ZOHO_PEOPLE_REFRESH_TOKEN`, `ZOHO_PEOPLE_DC` (default `eu`), scopes `ZOHOPEOPLE.leave.CREATE,ZOHOPEOPLE.leave.READ`. `--balance` is total entitlement; the helper verifies available plus taken. Other endpoints: import `scripts/people_api.py`.
 
 ## Answering "which Actions do I need"
 

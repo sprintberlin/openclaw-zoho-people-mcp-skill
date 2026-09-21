@@ -107,10 +107,18 @@ class CustomizeBalanceTests(unittest.TestCase):
     def test_customize_balance_builds_expected_request(self):
         recorded = {}
 
-        def fake_call(path, params=None, method="POST", credentials=None, timeout=30):
+        def fake_call(
+            path,
+            params=None,
+            method="POST",
+            credentials=None,
+            timeout=30,
+            params_in_query=False,
+        ):
             recorded["path"] = path
             recorded["params"] = params
             recorded["method"] = method
+            recorded["params_in_query"] = params_in_query
             return {"status": "success"}
 
         creds = {
@@ -131,14 +139,15 @@ class CustomizeBalanceTests(unittest.TestCase):
             )
 
         self.assertEqual(result, {"status": "success"})
-        self.assertEqual(recorded["path"], "/api/v2/leavetracker/settings/customize-balance/123")
+        self.assertEqual(recorded["path"], "/people/api/v2/leavetracker/settings/customize-balance/123")
         self.assertEqual(recorded["method"], "POST")
+        self.assertTrue(recorded["params_in_query"])
         balance_data = json.loads(recorded["params"]["balanceData"])
         self.assertEqual(
             balance_data["456"],
             {"date": "07-Sep-2026", "newBalance": 9.5, "reason": "Prorated entitlement"},
         )
-        self.assertEqual(recorded["params"]["dataFormat"], "dd-MMM-yyyy")
+        self.assertEqual(recorded["params"]["dateFormat"], "dd-MMM-yyyy")
 
     def test_build_request_rejects_invalid_input(self):
         with self.assertRaises(ValueError):
@@ -169,7 +178,7 @@ class CustomizeBalanceTests(unittest.TestCase):
         self.assertEqual(result.returncode, 0)
         preview = json.loads(result.stdout)
         self.assertTrue(preview["dry_run"])
-        self.assertEqual(preview["path"], "/api/v2/leavetracker/settings/customize-balance/123")
+        self.assertEqual(preview["path"], "/people/api/v2/leavetracker/settings/customize-balance/123")
 
 
 if __name__ == "__main__":

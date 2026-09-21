@@ -181,15 +181,24 @@ def access_token(credentials=None, use_cache=True, timeout=30):
     return token
 
 
-def call(path, params=None, method="POST", credentials=None, timeout=30):
-    """Call a Zoho People REST endpoint. `path` starts with /api/."""
+def call(
+    path,
+    params=None,
+    method="POST",
+    credentials=None,
+    timeout=30,
+    params_in_query=False,
+):
+    """Call a Zoho People REST endpoint."""
     creds = credentials or load_credentials()
     token = access_token(creds, timeout=timeout)
     url = f"https://{PEOPLE_DC[creds['dc']]}{path}"
     query = urllib.parse.urlencode(params or {})
     data = None
-    if method.upper() == "GET":
+    if method.upper() == "GET" or params_in_query:
         url = f"{url}?{query}" if query else url
+        if method.upper() != "GET":
+            data = b""
     else:
         data = query.encode("utf-8")
 
@@ -199,12 +208,15 @@ def call(path, params=None, method="POST", credentials=None, timeout=30):
         request.add_header("Content-Type", "application/x-www-form-urlencoded")
     try:
         with urllib.request.urlopen(request, timeout=timeout) as response:
+            status = response.status
             raw = response.read().decode("utf-8")
     except urllib.error.HTTPError as exc:
         detail = exc.read().decode("utf-8", errors="replace")
         raise PeopleApiError(f"HTTP {exc.code} from Zoho People: {detail}") from exc
     except urllib.error.URLError as exc:
         raise PeopleApiError(f"network error: {exc.reason}") from exc
+    if not raw.strip():
+        return {"status": "success", "http_status": status}
     try:
         return json.loads(raw)
     except json.JSONDecodeError as exc:

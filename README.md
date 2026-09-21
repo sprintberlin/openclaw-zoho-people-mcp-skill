@@ -153,14 +153,14 @@ python3 scripts/attendance_summary.py --erecno 12345 --json
 
 ### `customize_leave_balance.py`
 
-Sets one employee's leave balance via direct REST (MCP has no Action for this):
+Sets and verifies one employee's total leave entitlement via direct REST (MCP has no Action for this):
 
 ```bash
 python3 scripts/customize_leave_balance.py --erecno 12345 --leave-type-id 67890 \
   --balance 9.5 --date 07-Sep-2026 --reason "Prorated entitlement" --apply
 ```
 
-Requires `ZOHO_PEOPLE_CLIENT_ID`, `ZOHO_PEOPLE_CLIENT_SECRET`, `ZOHO_PEOPLE_REFRESH_TOKEN` (Self Client), optional `ZOHO_PEOPLE_DC`. Setup and other gaps: [`references/LIMITATIONS.md`](references/LIMITATIONS.md). `scripts/people_api.py` is the reusable OAuth/REST module.
+Requires `ZOHO_PEOPLE_CLIENT_ID`, `ZOHO_PEOPLE_CLIENT_SECRET`, `ZOHO_PEOPLE_REFRESH_TOKEN` (Self Client, scopes `ZOHOPEOPLE.leave.CREATE,ZOHOPEOPLE.leave.READ`), optional `ZOHO_PEOPLE_DC`. Setup and other gaps: [`references/LIMITATIONS.md`](references/LIMITATIONS.md). `scripts/people_api.py` is the reusable OAuth/REST module.
 
 ## People Action Catalog and Profiles
 
