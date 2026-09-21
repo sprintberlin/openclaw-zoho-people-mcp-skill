@@ -151,6 +151,17 @@ python3 scripts/leave_balances.py --erecno 12345 --year 0 --json
 python3 scripts/attendance_summary.py --erecno 12345 --json
 ```
 
+### `customize_leave_balance.py`
+
+Sets one employee's leave balance via direct REST (MCP has no Action for this):
+
+```bash
+python3 scripts/customize_leave_balance.py --erecno 12345 --leave-type-id 67890 \
+  --balance 9.5 --date 07-Sep-2026 --reason "Prorated entitlement" --apply
+```
+
+Requires `ZOHO_PEOPLE_CLIENT_ID`, `ZOHO_PEOPLE_CLIENT_SECRET`, `ZOHO_PEOPLE_REFRESH_TOKEN` (Self Client), optional `ZOHO_PEOPLE_DC`. Setup and other gaps: [`references/LIMITATIONS.md`](references/LIMITATIONS.md). `scripts/people_api.py` is the reusable OAuth/REST module.
+
 ## People Action Catalog and Profiles
 
 Zoho People exposes 369 MCP Actions. Enabling all of them gives a normal agent unnecessary access to salary data, benefit administration, and organization structure changes.
@@ -232,6 +243,7 @@ Most People APIs use `dd-MMM-yyyy`, for example `07-Sep-2026`. `getLeaveBalance`
 - `references/CATALOG_FORMAT.md`: Catalog format, record shape, and refresh procedure.
 - `references/ACTION_PROFILES.md`: Human-readable overview of profiles and task recipes.
 - `references/COMMON_WORKFLOWS.md`: Verified workflows for frequent People tasks.
+- `references/LIMITATIONS.md`: Known MCP gaps, causes, and direct REST fallbacks.
 - `references/MULTI_ACCOUNT.md`: Portable single-account and multi-account endpoint profiles.
 - `skill-card.md`: ClawHub release card metadata.
 - `scripts/lookup_actions.py`: Query Actions, profiles, and task recipes; validate them.
@@ -241,9 +253,12 @@ Most People APIs use `dd-MMM-yyyy`, for example `07-Sep-2026`. `getLeaveBalance`
 - `scripts/list_leave_types.py`: List leave types and fetch full configuration.
 - `scripts/leave_balances.py`: Fetch leave balances for one employee.
 - `scripts/attendance_summary.py`: Fetch attendance summaries.
+- `scripts/people_api.py`: Self Client OAuth and generic People REST access.
+- `scripts/customize_leave_balance.py`: Adjust one employee's leave balance via REST.
 - `scripts/mcp_endpoint.py`: Shared endpoint and profile resolver.
 - `tests/test_endpoint_resolution.py`: Credential-free resolver tests.
 - `tests/test_actions_lookup.py`: Catalog, profile, and lookup CLI tests.
+- `tests/test_people_api.py`: Credential-free tests for the REST fallback.
 
 ## Security Notes
 

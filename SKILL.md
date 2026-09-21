@@ -1,6 +1,6 @@
 ---
 name: "zoho-people-mcp"
-description: "Zoho People via MCP with action catalog, least-privilege profiles, employee, leave, and attendance helper scripts, and verified record workflows."
+description: "Zoho People via MCP: setup, action catalog, profiles, HR helpers, verified workflows, limits, and REST fallbacks."
 ---
 
 # Zoho People MCP
@@ -68,25 +68,23 @@ Resolution order is `--mcp-url`, selected profile, then the environment fallback
 
 ## Common calls
 
-List configured leave types:
-
 ```bash
-cat > /tmp/people_leave_types.json <<'JSON'
-{"body": {"startIndex": 1, "limit": 30}}
-JSON
-mcporter call "$ZOHO_PEOPLE_MCP_URL.ZohoPeople_fetchLeaveTypes" --args "$(< /tmp/people_leave_types.json)"
+mcporter call "$ZOHO_PEOPLE_MCP_URL.ZohoPeople_fetchLeaveTypes" --args '{"body": {"startIndex": 1, "limit": 30}}'
 ```
 
-Look up an employee:
+Use the live server's schema when it differs; nested arguments go in a temp JSON file.
+
+## Operations MCP cannot do
+
+Some operations have no MCP Action; see [references/LIMITATIONS.md](references/LIMITATIONS.md). Leave balance corrections need the REST fallback:
 
 ```bash
-cat > /tmp/people_employee.json <<'JSON'
-{"body": {"searchText": "Miller", "sIndex": 1, "limit": 20}}
-JSON
-mcporter call "$ZOHO_PEOPLE_MCP_URL.ZohoPeople_getEmployeeBasicDetails" --args "$(< /tmp/people_employee.json)"
+python3 scripts/customize_leave_balance.py \
+  --erecno 12345 --leave-type-id 67890 \
+  --balance 9.5 --date 07-Sep-2026 --reason "Prorated entitlement" --apply
 ```
 
-Use the schema shown by the live MCP server when it differs from these examples. For deeply nested arguments, use a temporary JSON file instead of fragile shell quoting.
+Env: `ZOHO_PEOPLE_CLIENT_ID`, `ZOHO_PEOPLE_CLIENT_SECRET`, `ZOHO_PEOPLE_REFRESH_TOKEN`, `ZOHO_PEOPLE_DC` (default `eu`), scope `ZOHOPEOPLE.leave.CREATE`. Refresh tokens stay valid until revoked; only the grant code expires. Other endpoints: import `scripts/people_api.py`.
 
 ## Answering "which Actions do I need"
 
@@ -163,6 +161,7 @@ Run any helper with `--help` without configuring credentials. Unknown or incompl
 - [Action profiles overview](references/ACTION_PROFILES.md): human-readable summary of the configured profiles and tasks
 - [Common workflows](references/COMMON_WORKFLOWS.md): verified step-by-step procedures for frequent People tasks
 - [Multi-account profiles](references/MULTI_ACCOUNT.md): portable endpoint selection for one or many Zoho accounts
+- [Limitations](references/LIMITATIONS.md): operations missing from the MCP catalog, their causes, and REST fallbacks
 
 Query the catalog with `scripts/lookup_actions.py` instead of loading `actions.jsonl` into context. Load workflows when executing a covered task.
 

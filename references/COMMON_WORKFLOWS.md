@@ -34,6 +34,7 @@ getEmployeeBasicDetails -> getLeaveBalance -> getLeaveRecords
 1. Resolve the employee `erecno`.
 2. Retrieve current balances: `getLeaveBalance` with `year=0` (relative: 0=current, 1=next, -1=previous).
 3. Review booked requests: `getLeaveRecords` with `from` and `to` in `dd-MMM-yyyy` format and the employee filter.
+4. Balances cannot be corrected through MCP. Fallback: `scripts/customize_leave_balance.py` (see [LIMITATIONS.md](LIMITATIONS.md)).
 
 ## 4. Attendance and time tracking check
 
