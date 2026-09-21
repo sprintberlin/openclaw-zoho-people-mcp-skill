@@ -275,9 +275,9 @@ clawhub skill publish . \
   --slug zoho-people-mcp \
   --name "Zoho People MCP" \
   --owner sprintcx \
-  --version 1.2.0 \
+  --version 1.3.0 \
   --source-repo sprintberlin/openclaw-zoho-people-mcp-skill \
   --source-ref main \
   --source-path . \
-  --changelog "JSON action catalog with role profiles, task recipes, and lookup CLI"
+  --changelog "Document MCP limitations and add REST fallback for leave balances"
 ```
